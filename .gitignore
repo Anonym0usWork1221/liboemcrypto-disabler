@@ -1,0 +1,16 @@
+# Build artifacts
+*.zip
+build/
+dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log

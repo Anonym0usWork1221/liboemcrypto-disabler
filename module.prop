@@ -1,0 +1,7 @@
+id=liboemcrypto_disabler
+name=liboemcrypto Disabler
+version=v1.0.0
+versionCode=10000
+author=Abdul Moez
+description=Disables /vendor/lib64/liboemcrypto.so and /vendor/lib/liboemcrypto.so to bypass OEM Widevine restrictions on rooted devices. Fixes EXO-1004 (Crunchyroll), DRM playback errors, and other root-detection issues in streaming apps. Forces fallback to Google's stock Widevine implementation. Fully systemless and reversible.
+updateJson=https://raw.githubusercontent.com/Anonym0usWork1221/liboemcrypto-disabler/main/update.json
