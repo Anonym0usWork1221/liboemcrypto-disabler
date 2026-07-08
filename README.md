@@ -148,7 +148,7 @@ above doesn't stick, use one of these fallbacks:
 - **Switch KernelSU's mount backend to Magic Mount** (available in recent
   KernelSU / KernelSU-Next builds) and reboot. Magic Mount applies module
   overlays the Magisk way, which lets `/odm` be replaced.
-- **Or install [HuskyDG's `magic_overlayfs`](https://github.com/HuskyDG/magic_overlayfs)**,
+- **Or install [Agreenbhm's `magic_overlayfs`](https://github.com/agreenbhm/magic_overlayfs)**,
   make `/odm` read-write (add `/odm` in its mount list / WebUI), reboot, then
   reflash this module.
 
