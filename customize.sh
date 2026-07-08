@@ -5,15 +5,60 @@
 
 ui_print " "
 ui_print "*******************************************"
-ui_print "      liboemcrypto Disabler v1.0.0         "
+ui_print "      liboemcrypto Disabler v2.0.0         "
 ui_print "      by Abdul Moez                        "
 ui_print "*******************************************"
 ui_print " "
-ui_print "- This module replaces:"
-ui_print "    /vendor/lib64/liboemcrypto.so"
-ui_print "    /vendor/lib/liboemcrypto.so"
-ui_print "  with empty files via systemless overlay."
+ui_print "- This module neutralizes the OEM Widevine"
+ui_print "  library (liboemcrypto.so) wherever your"
+ui_print "  device stores it, via a systemless overlay."
 ui_print " "
+
+# --- Detect where liboemcrypto.so lives on THIS device --------------------
+ui_print "- Scanning for liboemcrypto.so ..."
+FOUND=""
+ODM_FOUND=""
+for d in \
+    /vendor/lib64 /vendor/lib \
+    /odm/lib64 /odm/lib \
+    /vendor/odm/lib64 /vendor/odm/lib \
+    /system/odm/lib64 /system/odm/lib \
+    /system/vendor/lib64 /system/vendor/lib \
+    /product/lib64 /product/lib \
+    /system_ext/lib64 /system_ext/lib \
+    /my_product/lib64 /my_product/lib
+do
+    if [ -f "$d/liboemcrypto.so" ]; then
+        ui_print "    [+] found: $d/liboemcrypto.so"
+        FOUND="yes"
+        case "$d" in
+            /vendor/lib*) : ;;          # handled by the static /vendor overlay
+            *) ODM_FOUND="yes" ;;       # handled at boot by post-fs-data.sh
+        esac
+    fi
+done
+
+if [ -z "$FOUND" ]; then
+    ui_print " "
+    ui_print "  [!] liboemcrypto.so was not found in any known"
+    ui_print "      location. The module is still installed and"
+    ui_print "      will cover the standard /vendor path, but it"
+    ui_print "      may have no effect on this device."
+    ui_print "      Please open an issue and include the output of:"
+    ui_print "        find /vendor /odm /product /system_ext \\"
+    ui_print "             -name liboemcrypto.so 2>/dev/null"
+else
+    ui_print " "
+    ui_print "  Standard /vendor copies are neutralized by the"
+    ui_print "  systemless overlay."
+    if [ -n "$ODM_FOUND" ]; then
+        ui_print "  Non-standard copies (e.g. /odm on OnePlus,"
+        ui_print "  Oppo and Realme) are neutralized at every"
+        ui_print "  boot by post-fs-data.sh."
+    fi
+fi
+ui_print " "
+
 ui_print "- WHAT IT FIXES:"
 ui_print "    > Crunchyroll EXO-1004 error"
 ui_print "    > 'We're having trouble connecting' on video"

@@ -12,9 +12,19 @@
 
 ## What it does
 
-This module replaces `/vendor/lib64/liboemcrypto.so` and `/vendor/lib/liboemcrypto.so` with empty files using Magisk's systemless overlay. With the OEM Widevine library disabled, Android's DRM framework falls back to **Google's stock Widevine implementation**, which doesn't perform aggressive root detection.
+This module replaces `liboemcrypto.so` with an empty file using a systemless overlay. With the OEM Widevine library disabled, Android's DRM framework falls back to **Google's stock Widevine implementation**, which doesn't perform aggressive root detection.
 
 The result: streaming apps that previously refused to play video on rooted devices start working.
+
+Different OEMs ship `liboemcrypto.so` in different partitions, and the module handles all of them:
+
+- **`/vendor/lib{,64}`** (standard AOSP/Qualcomm layout — most brands) is neutralized by a static systemless overlay.
+- **`/odm/lib{,64}`** (OnePlus, Oppo, Realme — ColorOS / OxygenOS 11+ / Realme UI) and other non-`/vendor` locations (`/vendor/odm`, `/system/vendor`, `/product`, `/system_ext`, `/my_product`) are neutralized at every boot by a bind mount in `post-fs-data.sh`.
+
+> **OnePlus / Oppo / Realme note:** on these devices `liboemcrypto.so` lives in
+> `/odm/lib64/` (the ODM partition) instead of `/vendor/lib64/`. Magisk's magic
+> mount does not officially map `/odm`, so **v2.0.0+** covers it with a boot-time
+> bind mount that works identically on Magisk, KernelSU and APatch.
 
 ## Problems it fixes
 
@@ -105,11 +115,18 @@ After reboot, confirm the module is active:
 
 ```bash
 su
+# Standard devices:
 ls -la /vendor/lib64/liboemcrypto.so
-# Size should be 0 bytes (or close to it)
+# OnePlus / Oppo / Realme:
+ls -la /odm/lib64/liboemcrypto.so
+# Size should be 0 bytes on whichever path your device uses
 
 ls /data/adb/modules/liboemcrypto_disabler/
 # Should show module files
+
+# Confirm the /odm bind mount is active (OnePlus/Oppo/Realme):
+logcat -d -s liboemcrypto-disabler
+# Should show "overlaid empty stub onto /odm/lib64/liboemcrypto.so"
 ```
 
 You can also install [**DRM Info**](https://play.google.com/store/apps/details?id=com.androidcentral.app.drminfo) from the Play Store. Before/after comparison:
@@ -126,12 +143,18 @@ This level change is expected and is what enables Crunchyroll-style apps to play
 | **Android** | 10, 11, 12, 13, 14, 15, 16+ |
 | **Architecture** | arm64-v8a, armeabi-v7a |
 | **Root solutions** | Magisk v20.4+, KernelSU, APatch |
-| **Partitions** | Dynamic and legacy `/vendor` layouts |
+| **Partitions** | `/vendor`, `/odm`, `/vendor/odm`, `/system/vendor`, `/product`, `/system_ext`, `/my_product` (lib + lib64) |
+| **OEMs** | Standard `/vendor` brands (Samsung, Xiaomi, Sony, Pixel, Motorola, Asus, Nothing, Vivo) **and** `/odm` brands (OnePlus, Oppo, Realme) |
 
 Tested on:
 - Snapdragon 8 Gen 2 (RedMagic 8S Pro / NX729J)
 - Snapdragon 8 Gen 3 devices
 - MediaTek Dimensity series
+
+> **OnePlus / Oppo / Realme (`/odm`) support landed in v2.0.0** and has not yet
+> been broadly device-confirmed. If it works (or doesn't) on your `/odm` device,
+> please open an issue — include the output of
+> `find /vendor /odm /product /system_ext -name liboemcrypto.so 2>/dev/null`.
 
 If your device works, please open an issue with the `device-confirmed` label so others know.
 
@@ -150,7 +173,7 @@ If your device works, please open an issue with the `device-confirmed` label so 
 - ⚠️ Drops Widevine to L3 → HD streaming breaks on Netflix, Disney+, etc.
 - ⚠️ Not a fix for *every* DRM issue (some apps check beyond Widevine)
 - ⚠️ Doesn't bypass Play Integrity API — pair with PIF if needed
-- ⚠️ Some custom ROMs may need a different `.so` path (rare)
+- ⚠️ A rare custom ROM may relocate the `.so` to an unlisted path — if so, open an issue with the `find` output and it can be added
 
 ## Toggling
 
