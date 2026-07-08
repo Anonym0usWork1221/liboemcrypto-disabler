@@ -109,6 +109,55 @@ Different OEMs ship `liboemcrypto.so` in different partitions, and the module ha
 2. Open **APatch** → **APModule** → **Install from storage**
 3. Reboot
 
+## Using on OnePlus / Oppo / Realme (`/odm` devices)
+
+On the **oplus family** — OnePlus (OxygenOS 11/12/13/14), Oppo (ColorOS) and
+Realme (Realme UI) — `liboemcrypto.so` lives in **`/odm/lib64/`**, not
+`/vendor/lib64/`. This is why v1.x had no effect on these phones.
+
+**As of v2.0.0 this is handled automatically.** On boot, the module's
+`post-fs-data.sh` bind-mounts an empty stub over the real library wherever it
+finds it (including `/odm`). This works on **Magisk, KernelSU and APatch**
+without any extra modules or manual mounting.
+
+> ✅ **Confirmed working — OnePlus 11R, OxygenOS 14.**
+> A user reported from the XDA
+> [EXO-1004 thread](https://xdaforums.com/t/fixed-error-exo-1004-with-the-crunchyroll-app-and-system-ro2rw-tutoral.4690132/):
+> *"Yep, it's working now."* They noted that on **KernelSU** they had to enable
+> **Magic Mount** and add the `/odm` mount manually — the automatic bind mount in
+> v2.0.0 is designed to remove that manual step.
+
+### Steps
+
+1. Flash the zip via Magisk / KernelSU / APatch (any method above).
+2. **Reboot.**
+3. Verify the library is now empty:
+   ```bash
+   su
+   ls -la /odm/lib64/liboemcrypto.so     # size should be 0
+   logcat -d -s liboemcrypto-disabler    # should log "neutralized /odm/lib64/liboemcrypto.so"
+   ```
+4. Force-stop and **clear data** on your streaming app, then test playback.
+
+### If it still doesn't take effect on KernelSU
+
+A small number of KernelSU setups (certain kernels / `f2fs` `/odm`) won't let a
+module touch `/odm` through the default OverlayFS backend. If the automatic fix
+above doesn't stick, use one of these fallbacks:
+
+- **Switch KernelSU's mount backend to Magic Mount** (available in recent
+  KernelSU / KernelSU-Next builds) and reboot. Magic Mount applies module
+  overlays the Magisk way, which lets `/odm` be replaced.
+- **Or install [HuskyDG's `magic_overlayfs`](https://github.com/HuskyDG/magic_overlayfs)**,
+  make `/odm` read-write (add `/odm` in its mount list / WebUI), reboot, then
+  reflash this module.
+
+If you had to use a fallback, please
+[open an issue](https://github.com/Anonym0usWork1221/liboemcrypto-disabler/issues)
+with your device model, ROM version and root solution so the automatic path can
+be improved — include the output of
+`find /vendor /odm /product /system_ext -name liboemcrypto.so 2>/dev/null`.
+
 ## Verification
 
 After reboot, confirm the module is active:
@@ -151,10 +200,10 @@ Tested on:
 - Snapdragon 8 Gen 3 devices
 - MediaTek Dimensity series
 
-> **OnePlus / Oppo / Realme (`/odm`) support landed in v2.0.0** and has not yet
-> been broadly device-confirmed. If it works (or doesn't) on your `/odm` device,
-> please open an issue — include the output of
-> `find /vendor /odm /product /system_ext -name liboemcrypto.so 2>/dev/null`.
+> **OnePlus / Oppo / Realme (`/odm`) support landed in v2.0.0**, confirmed
+> working on **OnePlus 11R (OxygenOS 14)**. More `/odm` device reports are
+> welcome — if it works (or doesn't) on yours, please open an issue with the
+> output of `find /vendor /odm /product /system_ext -name liboemcrypto.so 2>/dev/null`.
 
 If your device works, please open an issue with the `device-confirmed` label so others know.
 

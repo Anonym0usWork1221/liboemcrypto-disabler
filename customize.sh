@@ -5,7 +5,7 @@
 
 ui_print " "
 ui_print "*******************************************"
-ui_print "      liboemcrypto Disabler v2.0.0         "
+ui_print "      liboemcrypto Disabler v2.0.1         "
 ui_print "      by Abdul Moez                        "
 ui_print "*******************************************"
 ui_print " "

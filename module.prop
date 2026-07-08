@@ -1,7 +1,7 @@
 id=liboemcrypto_disabler
 name=liboemcrypto Disabler
-version=v2.0.0
-versionCode=20000
+version=v2.0.1
+versionCode=20001
 author=Abdul Moez
 description=Neutralizes the OEM Widevine library (liboemcrypto.so) to bypass Widevine-level root detection on rooted devices. Fixes EXO-1004 (Crunchyroll), DRM playback errors, and streaming-app root detection by forcing fallback to Google's stock Widevine. Now handles both the standard /vendor path and the /odm path used by OnePlus, Oppo and Realme, plus /product, /system_ext and legacy layouts. Fully systemless and reversible.
 updateJson=https://raw.githubusercontent.com/Anonym0usWork1221/liboemcrypto-disabler/main/update.json

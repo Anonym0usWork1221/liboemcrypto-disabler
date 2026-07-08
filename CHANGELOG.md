@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.1] - 2026-07-08
+
+### Changed
+- `post-fs-data.sh` now also covers `/vendor/lib{,64}` (not just the non-`/vendor`
+  paths), making it a self-healing fallback for the rare KernelSU / OverlayFS
+  setup where the static overlay does not apply. `/vendor` and `/odm` are now
+  handled by one uniform, root-solution-independent bind mount. Confirmed
+  working on **OnePlus 11R (OxygenOS 14)**.
+
+### Added
+- README: dedicated **"Using on OnePlus / Oppo / Realme (`/odm`) devices"** guide
+  with verification steps and a KernelSU fallback (switch to Magic Mount, or use
+  [HuskyDG's `magic_overlayfs`](https://github.com/HuskyDG/magic_overlayfs) and
+  add `/odm`) for setups where the automatic overlay does not stick.
+- Clearer `post-fs-data.sh` logging (per-file `neutralized` / `FAILED` lines plus
+  a final count), visible via `logcat -s liboemcrypto-disabler`.
+
 ## [v2.0.0] - 2026-07-08
 
 ### Added
